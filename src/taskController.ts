@@ -31,38 +31,31 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const { page = "1", limit = "10", completed, search } = req.query;
+    // const { page = "1", limit = "10", completed, search } = req.query;
 
-    const pageNumber = parseInt(page as string);
-    const pageSize = parseInt(limit as string);
+    // const pageNumber = parseInt(page as string);
+    // const pageSize = parseInt(limit as string);
 
-    const whereClause: any = { userId };
+        // const whereClause: any = { userId };
 
-    if (completed !== undefined) {
-      whereClause.completed = completed === "true";
-    }
+        // if (completed !== undefined) {
+        //   whereClause.completed = completed === "true";
+        // }
 
-    if (search) {
-      whereClause.description = {
-        contains: search as string,
-        mode: "insensitive",
-      };
-    }
+        // if (search) {
+        //   whereClause.description = {
+        //     contains: search as string,
+        //     mode: "insensitive",
+        //   };
+        // }
 
     const tasks = await prisma.task.findMany({
-      where: whereClause,
-      skip: (pageNumber - 1) * pageSize,
-      take: pageSize,
+      where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
-    const total = await prisma.task.count({
-      where: whereClause,
-    });
+
     return res.json({
-      total,
-      page: pageNumber,
-      pageSize,
       tasks,
     });
   } catch (error) {
