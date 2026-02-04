@@ -2,7 +2,6 @@ import type { Response } from "express";
 import { prisma } from "./prisma.js";
 import type { AuthRequest } from "./authMiddleware.js";
 
-
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
     const { description } = req.body;
@@ -27,33 +26,14 @@ export const createTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    // const { page = "1", limit = "10", completed, search } = req.query;
-
-    // const pageNumber = parseInt(page as string);
-    // const pageSize = parseInt(limit as string);
-
-        // const whereClause: any = { userId };
-
-        // if (completed !== undefined) {
-        //   whereClause.completed = completed === "true";
-        // }
-
-        // if (search) {
-        //   whereClause.description = {
-        //     contains: search as string,
-        //     mode: "insensitive",
-        //   };
-        // }
 
     const tasks = await prisma.task.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
-
 
     return res.json({
       tasks,
@@ -63,11 +43,14 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const getTaskById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.userId!;
+
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({ message: "Invalid task id" });
+    }
 
     const task = await prisma.task.findFirst({
       where: {
@@ -86,21 +69,22 @@ export const getTaskById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const updateTask = async (req: AuthRequest, res: Response) => {
   try {
-
     console.log("Update Task Req Body:", req.body);
     const { id } = req.params;
     const { description, completed } = req.body;
     const userId = req.userId!;
 
     const existing = await prisma.task.findFirst({
-      where: {  userId },
+      where: { userId },
     });
 
     if (!existing) {
       return res.status(404).json({ message: "Task not found" });
+    }
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({ message: "Invalid task id" });
     }
 
     const updated = await prisma.task.update({
@@ -117,11 +101,14 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.userId!;
+
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({ message: "Invalid task id" });
+    }
 
     const existing = await prisma.task.findFirst({
       where: { id, userId },
@@ -141,11 +128,14 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const toggleTask = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const userId = req.userId!;
+
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({ message: "Invalid task id" });
+    }
 
     const task = await prisma.task.findFirst({
       where: { id, userId },
